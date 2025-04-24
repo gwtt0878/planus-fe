@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Schedule } from '@/types/schedule';
+import { Schedule, ScheduleWithMembers, User } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
 
 export default function ScheduleDetail() {
-  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleWithMembers | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { userId } = useAuthStore();
+  const { userId, nickname } = useAuthStore();
   const params = useParams<{id: string}>();
 
   const fetchSchedule = useCallback(async () => {
@@ -110,56 +110,82 @@ export default function ScheduleDetail() {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-extrabold text-gray-900">{schedule.title}</h2>
             <div className="flex space-x-2">
-              <button
-                onClick={handleEdit}
-                className="btn-primary"
+              {schedule.creatorNickname === nickname && (
+                <>
+                  <button
+                    onClick={handleEdit}
+                    className="btn-primary"
               >
                 수정
               </button>
               <button
                 onClick={handleDelete}
-                className="btn-danger"
-              >
-                삭제
-              </button>
+                    className="btn-danger"
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="form-container">
-            <div>
-              <h3 className="section-title">설명</h3>
-              <p className="section-content whitespace-pre-wrap">{schedule.description}</p>
-            </div>
+          <div className="max-w-2xl mx-auto p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{schedule.title}</h1>
+              </div>
 
-            <div>
-              <h3 className="section-title">일정 시간</h3>
-              <p className="section-content">
-                {new Date(schedule.meetingDateTime).toLocaleString('ko-KR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-            </div>
+              <div className="form-container">
+                <div>
+                  <h3 className="section-title">설명</h3>
+                  <p className="section-content whitespace-pre-wrap">{schedule.description}</p>
+                </div>
 
-            <div>
-              <h3 className="section-title">장소</h3>
-              <p className="section-content">{schedule.meetingPlace}</p>
-            </div>
-          </div>
+                <div>
+                  <h3 className="section-title">일정 시간</h3>
+                  <p className="section-content">
+                    {new Date(schedule.meetingDateTime).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
 
-          <div className="mt-8">
-            <button
-              onClick={handleBack}
-              className="btn-secondary w-full"
-            >
-              대시보드로 돌아가기
-            </button>
+                <div>
+                  <h3 className="section-title">장소</h3>
+                  <p className="section-content">{schedule.meetingPlace}</p>
+                </div>
+
+                <div>
+                  <h3 className="section-title">참가자</h3>
+                  <ul className="mt-2 space-y-2">
+                    {schedule.members?.map(member => (
+                      <li
+                        key={member.id}
+                        className="flex items-center justify-between bg-gray-100 rounded-md px-3 py-2"
+                      >
+                        <span>{member.nickname}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={handleBack}
+                  className="btn-secondary w-full"
+                >
+                  대시보드로 돌아가기
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

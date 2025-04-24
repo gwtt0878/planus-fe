@@ -12,4 +12,4 @@ export default function Home() {
   }, [router]);
 
   return null;
-} 
+}

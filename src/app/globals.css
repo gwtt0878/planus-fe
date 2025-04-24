@@ -106,7 +106,7 @@ body {
   .page-container {
     @apply py-6 px-2;
   }
-  
+
   .card {
     @apply py-6 px-4;
   }
@@ -133,4 +133,4 @@ body {
   .section-content {
     @apply text-gray-400;
   }
-} 
+}

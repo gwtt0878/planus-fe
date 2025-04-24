@@ -24,7 +24,7 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        login(data.userId);
+        login(data.userId, data.nickname, data.email);
         router.push('/dashboard');
       } else {
         const errorData = await response.json();
@@ -98,4 +98,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

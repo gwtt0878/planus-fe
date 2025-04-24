@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 export default function DashboardPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const router = useRouter();
-  const { userId, isLoggedIn } = useAuthStore();
+  const { userId, isLoggedIn, nickname } = useAuthStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -98,35 +98,37 @@ export default function DashboardPage() {
                 <div className="px-4 py-4 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div
-                        className="h-4 w-4 rounded-full mr-3"
-                        style={{ backgroundColor: '#3B82F6' }}
-                      />
                       <p className="text-lg font-medium text-indigo-600 truncate">
                         {schedule.title}
                       </p>
+                      <div className="ml-2 text-sm text-gray-400">
+                        {schedule.creatorNickname}
+                      </div>
                     </div>
-                    <div>
-                      <button
+                    <div className="ml-2 flex-shrink-0 flex gap-4">
+                    <button
                         onClick={() => router.push(`/schedule/${schedule.id}`)}
-                        className="font-medium text-indigo-600 hover:text-indigo-500 mr-4"
+                        className="font-medium text-gray-600 hover:text-indigo-500 px-2 py-1 rounded-md border border-indigo-600"
                       >
                         상세보기
                       </button>
-                    </div>
-                    <div className="ml-2 flex-shrink-0 flex">
-                      <button
-                        onClick={() => router.push(`/schedule/edit/${schedule.id}`)}
-                        className="font-medium text-indigo-600 hover:text-indigo-500 mr-4"
-                      >
-                        수정
-                      </button>
-                      <button
-                        onClick={() => handleDelete(schedule.id!)}
-                        className="font-medium text-red-600 hover:text-red-500"
-                      >
-                        삭제
-                      </button>
+                      {schedule.creatorNickname === nickname && (
+                        <button
+                          onClick={() => router.push(`/schedule/edit/${schedule.id}`)}
+                          className="font-medium text-indigo-600 hover:text-indigo-500 px-2 py-1 rounded-md border border-indigo-600"
+                        >
+                          수정
+                        </button>
+                        )}
+                      {schedule.creatorNickname === nickname && (
+                        <button
+                          onClick={() => handleDelete(schedule.id!)}
+                          className="font-medium text-red-600 hover:text-red-500 px-2 py-1 rounded-md border border-red-600"
+                        >
+                          삭제
+                        </button>
+                      )}
+
                     </div>
                   </div>
                   <div className="mt-2 sm:flex sm:justify-between">
@@ -137,7 +139,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                       <p>
-                        {formatDateTime(schedule.meetingDateTime)}
+                        {formatDateTime(schedule.meetingDateTime)} 에 예약된 일정입니다.
                       </p>
                     </div>
                   </div>
@@ -156,4 +158,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}
