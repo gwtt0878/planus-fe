@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 
 export default function Header() {
   const router = useRouter();
-  const { isLoggedIn, logout } = useAuthStore();
+  const { isLoggedIn, logout, nickname } = useAuthStore();
 
   const handleLogout = () => {
     logout();
@@ -25,6 +25,7 @@ export default function Header() {
           </div>
           {isLoggedIn && (
             <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-500">{nickname}</div>
               <button
                 onClick={() => router.push('/info')}
                 className="inline-flex items-center rounded-md border border-indigo-300 bg-white px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

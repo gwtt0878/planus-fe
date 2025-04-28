@@ -9,7 +9,7 @@ import { API } from '@/config/api';
 export default function DashboardPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const router = useRouter();
-  const { userId, isLoggedIn, nickname } = useAuthStore();
+  const { isLoggedIn, nickname } = useAuthStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -22,12 +22,7 @@ export default function DashboardPage() {
   const fetchSchedules = async () => {
     try {
       const response = await fetch(
-        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.LIST}`,
-        {
-          headers: {
-            Authorization: `Bearer ${userId}`,
-          },
-        }
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.LIST}`
       );
 
       if (response.ok) {
@@ -52,9 +47,6 @@ export default function DashboardPage() {
         `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(id)}`,
         {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${userId}`,
-          },
           credentials: 'include',
         }
       );

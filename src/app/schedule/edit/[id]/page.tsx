@@ -26,12 +26,7 @@ export default function EditSchedule() {
   const fetchSchedule = useCallback(async () => {
     try {
       const response = await fetch(
-        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`,
-        {
-          headers: {
-            Authorization: `Bearer ${currentUserId}`,
-          },
-        }
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`
       );
 
       if (response.ok) {
@@ -63,12 +58,7 @@ export default function EditSchedule() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `${API.BASE_URL}${API.ENDPOINTS.USER.SEARCH}?nickname=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${currentUserId}`,
-            },
-          }
+          `${API.BASE_URL}${API.ENDPOINTS.USER.SEARCH}?nickname=${encodeURIComponent(query)}`
         );
 
         if (response.ok) {
@@ -148,7 +138,6 @@ export default function EditSchedule() {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUserId}`,
             },
             credentials: 'include',
             body: JSON.stringify(scheduleJSON),

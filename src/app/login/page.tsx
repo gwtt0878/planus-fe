@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import React from 'react';
@@ -10,7 +10,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const { isLoggedIn, login } = useAuthStore();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/dashboard');
+    }
+  }, [isLoggedIn, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +36,6 @@ export default function LoginPage() {
       if (response.ok) {
         const data = await response.json();
         login(data.userId, data.nickname, data.email);
-        router.push('/dashboard');
       } else {
         const errorData = await response.json();
         alert(errorData.message || '로그인에 실패했습니다.');

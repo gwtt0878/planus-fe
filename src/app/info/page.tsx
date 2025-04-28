@@ -24,9 +24,6 @@ export default function InfoPage() {
       const response = await fetch(
         `${API.BASE_URL}${API.ENDPOINTS.USER.MY_INFO}?nickname=${nickname}`,
         {
-          headers: {
-            Authorization: `Bearer ${userId}`,
-          },
           credentials: 'include',
         }
       );

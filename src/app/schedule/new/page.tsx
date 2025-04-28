@@ -55,12 +55,7 @@ export default function CreateSchedule() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `${API.BASE_URL}${API.ENDPOINTS.USER.SEARCH}?nickname=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${currentUserId}`,
-            },
-          }
+          `${API.BASE_URL}${API.ENDPOINTS.USER.SEARCH}?nickname=${encodeURIComponent(query)}`
         );
 
         if (response.ok) {
@@ -149,7 +144,6 @@ export default function CreateSchedule() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${currentUserId}`,
             },
             credentials: 'include',
             body: JSON.stringify(scheduleJSON),

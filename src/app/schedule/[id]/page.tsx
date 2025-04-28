@@ -16,12 +16,7 @@ export default function ScheduleDetail() {
   const fetchSchedule = useCallback(async () => {
     try {
       const response = await fetch(
-        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`,
-        {
-          headers: {
-            Authorization: `Bearer ${userId}`,
-          },
-        }
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`
       );
 
       if (response.ok) {
@@ -57,9 +52,7 @@ export default function ScheduleDetail() {
         `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(Number(params.id))}`,
         {
           method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${userId}`,
-          },
+          credentials: 'include',
         }
       );
 
