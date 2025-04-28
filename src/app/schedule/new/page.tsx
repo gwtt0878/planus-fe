@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Schedule, ScheduleWithMembers } from '@/types/schedule';
+import { ScheduleWithMembers } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
-
+import React from 'react';
+import { API } from '@/config/api';
 interface User {
   id: number;
   email: string;
@@ -20,14 +21,20 @@ interface ScheduleJSON {
 }
 
 export default function CreateSchedule() {
-  const { userId: currentUserId, nickname: currentNickname, email: currentEmail } = useAuthStore();
+  const {
+    userId: currentUserId,
+    nickname: currentNickname,
+    email: currentEmail,
+  } = useAuthStore();
 
   const [schedule, setSchedule] = useState<ScheduleWithMembers>({
     title: '',
     description: '',
     meetingDateTime: '',
     meetingPlace: '',
-    members: [{ id: currentUserId, email: currentEmail, nickname: currentNickname }],
+    members: [
+      { id: currentUserId, email: currentEmail, nickname: currentNickname },
+    ],
     creatorNickname: currentNickname,
     createdAt: '',
     updatedAt: '',
@@ -38,30 +45,36 @@ export default function CreateSchedule() {
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const response = await fetch(`http://localhost:8080/user/search?nickname=${encodeURIComponent(query)}`, {
-        headers: {
-          'Authorization': `Bearer ${currentUserId}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.users);
+  const handleSearch = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
       }
-    } catch (error) {
-      console.error('유저 검색 에러:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [currentUserId]);
+
+      setIsSearching(true);
+      try {
+        const response = await fetch(
+          `${API.BASE_URL}${API.ENDPOINTS.USER.SEARCH}?nickname=${encodeURIComponent(query)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${currentUserId}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data.users);
+        }
+      } catch (error) {
+        console.error('유저 검색 에러:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [currentUserId]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,61 +88,87 @@ export default function CreateSchedule() {
     return () => clearTimeout(timer);
   }, [searchQuery, handleSearch]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setSchedule(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setSchedule((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-  }, []);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchQuery(value);
+    },
+    []
+  );
 
-  const handleAddUser = useCallback((user: User) => {
-    if (!schedule.members.some(m => m.id === user.id)) {
-      setSchedule(prev => ({ ...prev, members: [...prev.members, user].sort((a, b) => a.nickname.localeCompare(b.nickname)) }));
-    }
-    setSearchQuery('');
-    setSearchResults([]);
-  }, [schedule.members]);
-
-  const handleRemoveUser = useCallback((userId: number) => {
-    setSchedule(prev => ({ ...prev, members: prev.members.filter(m => m.id !== userId) }));
-  }, [schedule.members]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // 일정 생성
-      const scheduleJSON: ScheduleJSON = {
-        title: schedule.title,
-        description: schedule.description,
-        meetingDateTime: schedule.meetingDateTime,
-        meetingPlace: schedule.meetingPlace,
-        memberIds: schedule.members.map(m => m.id),
-      };
-      const scheduleResponse = await fetch('http://localhost:8080/schedule', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUserId}`,
-        },
-        credentials: 'include',
-        body: JSON.stringify(scheduleJSON),
-      });
-
-      if (!scheduleResponse.ok) {
-        throw new Error('일정 생성에 실패했습니다.');
+  const handleAddUser = useCallback(
+    (user: User) => {
+      if (!schedule.members.some((m) => m.id === user.id)) {
+        setSchedule((prev) => ({
+          ...prev,
+          members: [...prev.members, user].sort((a, b) =>
+            a.nickname.localeCompare(b.nickname)
+          ),
+        }));
       }
+      setSearchQuery('');
+      setSearchResults([]);
+    },
+    [schedule.members]
+  );
 
-      alert('일정이 생성되었습니다.');
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('일정 생성 에러:', error);
-      alert('일정 생성 중 오류가 발생했습니다.');
-    }
-  }, [schedule, currentUserId, router]);
+  const handleRemoveUser = useCallback(
+    (userId: number) => {
+      setSchedule((prev) => ({
+        ...prev,
+        members: prev.members.filter((m) => m.id !== userId),
+      }));
+    },
+    [schedule.members]
+  );
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      try {
+        // 일정 생성
+        const scheduleJSON: ScheduleJSON = {
+          title: schedule.title,
+          description: schedule.description,
+          meetingDateTime: schedule.meetingDateTime,
+          meetingPlace: schedule.meetingPlace,
+          memberIds: schedule.members.map((m) => m.id),
+        };
+        const scheduleResponse = await fetch(
+          `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.CREATE}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${currentUserId}`,
+            },
+            credentials: 'include',
+            body: JSON.stringify(scheduleJSON),
+          }
+        );
+
+        if (!scheduleResponse.ok) {
+          throw new Error('일정 생성에 실패했습니다.');
+        }
+
+        alert('일정이 생성되었습니다.');
+        router.push('/dashboard');
+      } catch (error) {
+        console.error('일정 생성 에러:', error);
+        alert('일정 생성 중 오류가 발생했습니다.');
+      }
+    },
+    [schedule, currentUserId, router]
+  );
 
   const handleCancel = useCallback(() => {
     router.push('/dashboard');
@@ -142,11 +181,15 @@ export default function CreateSchedule() {
     <div className="page-container animate-fade-in">
       <div className="content-container">
         <div className="card">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-8">{pageTitle}</h2>
+          <h2 className="mb-8 text-3xl font-extrabold text-gray-900">
+            {pageTitle}
+          </h2>
 
           <form onSubmit={handleSubmit} className="form-container">
             <div>
-              <label htmlFor="title" className="label">제목</label>
+              <label htmlFor="title" className="label">
+                제목
+              </label>
               <input
                 type="text"
                 id="title"
@@ -159,7 +202,9 @@ export default function CreateSchedule() {
             </div>
 
             <div>
-              <label htmlFor="description" className="label">설명</label>
+              <label htmlFor="description" className="label">
+                설명
+              </label>
               <textarea
                 id="description"
                 name="description"
@@ -171,7 +216,9 @@ export default function CreateSchedule() {
             </div>
 
             <div>
-              <label htmlFor="meetingDateTime" className="label">일정 시간</label>
+              <label htmlFor="meetingDateTime" className="label">
+                일정 시간
+              </label>
               <input
                 type="datetime-local"
                 id="meetingDateTime"
@@ -184,7 +231,9 @@ export default function CreateSchedule() {
             </div>
 
             <div>
-              <label htmlFor="meetingPlace" className="label">장소</label>
+              <label htmlFor="meetingPlace" className="label">
+                장소
+              </label>
               <input
                 type="text"
                 id="meetingPlace"
@@ -207,19 +256,19 @@ export default function CreateSchedule() {
                   className="input-field"
                 />
                 {isSearching && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                     <div className="loading-spinner"></div>
                   </div>
                 )}
               </div>
 
               {searchResults.length > 0 && (
-                <div className="mt-2 bg-white border border-gray-300 rounded-md shadow-lg">
+                <div className="mt-2 rounded-md border border-gray-300 bg-white shadow-lg">
                   <ul className="divide-y divide-gray-200">
-                    {searchResults.map(user => (
+                    {searchResults.map((user) => (
                       <li
                         key={user.id}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="cursor-pointer px-4 py-2 hover:bg-gray-100"
                         onClick={() => handleAddUser(user)}
                       >
                         {user.nickname}
@@ -233,20 +282,20 @@ export default function CreateSchedule() {
                 <div className="mt-4">
                   <h3 className="section-title">선택된 참가자</h3>
                   <ul className="mt-2 space-y-2">
-                    {schedule.members.map(user => (
+                    {schedule.members.map((user) => (
                       <li
                         key={user.id}
-                        className="flex items-center justify-between bg-gray-100 rounded-md px-3 py-2"
+                        className="flex items-center justify-between rounded-md bg-gray-100 px-3 py-2"
                       >
                         <span>{user.nickname}</span>
                         {user.id !== currentUserId && (
                           <button
                             type="button"
-                          onClick={() => handleRemoveUser(user.id)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          ×
-                        </button>
+                            onClick={() => handleRemoveUser(user.id)}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            ×
+                          </button>
                         )}
                       </li>
                     ))}
@@ -256,10 +305,7 @@ export default function CreateSchedule() {
             </div>
 
             <div className="flex space-x-4">
-              <button
-                type="submit"
-                className="btn-primary flex-1"
-              >
+              <button type="submit" className="btn-primary flex-1">
                 {submitButtonText}
               </button>
               <button

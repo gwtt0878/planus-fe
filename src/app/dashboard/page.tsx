@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Schedule } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
+import { API } from '@/config/api';
 
 export default function DashboardPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -20,11 +21,14 @@ export default function DashboardPage() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await fetch('http://localhost:8080/schedule', {
-        headers: {
-          'Authorization': `Bearer ${userId}`,
-        },
-      });
+      const response = await fetch(
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.LIST}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -44,13 +48,16 @@ export default function DashboardPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/schedule/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${userId}`,
-        },
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(id)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
+          credentials: 'include',
+        }
+      );
 
       if (response.ok) {
         alert('일정이 삭제되었습니다.');
@@ -79,56 +86,57 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-extrabold text-gray-900">일정 관리</h1>
           <button
             onClick={() => router.push('/schedule/new')}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             일정 추가
           </button>
         </div>
 
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="overflow-hidden bg-white shadow sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {schedules.map((schedule) => (
               <li key={schedule.id}>
                 <div className="px-4 py-4 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <p className="text-lg font-medium text-indigo-600 truncate">
+                      <p className="truncate text-lg font-medium text-indigo-600">
                         {schedule.title}
                       </p>
                       <div className="ml-2 text-sm text-gray-400">
                         {schedule.creatorNickname}
                       </div>
                     </div>
-                    <div className="ml-2 flex-shrink-0 flex gap-4">
-                    <button
+                    <div className="ml-2 flex flex-shrink-0 gap-4">
+                      <button
                         onClick={() => router.push(`/schedule/${schedule.id}`)}
-                        className="font-medium text-gray-600 hover:text-indigo-500 px-2 py-1 rounded-md border border-indigo-600"
+                        className="rounded-md border border-indigo-600 px-2 py-1 font-medium text-gray-600 hover:text-indigo-500"
                       >
                         상세보기
                       </button>
                       {schedule.creatorNickname === nickname && (
                         <button
-                          onClick={() => router.push(`/schedule/edit/${schedule.id}`)}
-                          className="font-medium text-indigo-600 hover:text-indigo-500 px-2 py-1 rounded-md border border-indigo-600"
+                          onClick={() =>
+                            router.push(`/schedule/edit/${schedule.id}`)
+                          }
+                          className="rounded-md border border-indigo-600 px-2 py-1 font-medium text-indigo-600 hover:text-indigo-500"
                         >
                           수정
                         </button>
-                        )}
+                      )}
                       {schedule.creatorNickname === nickname && (
                         <button
                           onClick={() => handleDelete(schedule.id!)}
-                          className="font-medium text-red-600 hover:text-red-500 px-2 py-1 rounded-md border border-red-600"
+                          className="rounded-md border border-red-600 px-2 py-1 font-medium text-red-600 hover:text-red-500"
                         >
                           삭제
                         </button>
                       )}
-
                     </div>
                   </div>
                   <div className="mt-2 sm:flex sm:justify-between">
@@ -139,7 +147,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                       <p>
-                        {formatDateTime(schedule.meetingDateTime)} 에 예약된 일정입니다.
+                        {formatDateTime(schedule.meetingDateTime)} 에 예약된
+                        일정입니다.
                       </p>
                     </div>
                   </div>

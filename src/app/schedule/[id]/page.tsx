@@ -2,23 +2,27 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Schedule, ScheduleWithMembers, User } from '@/types/schedule';
+import { ScheduleWithMembers } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
+import { API } from '@/config/api';
 
 export default function ScheduleDetail() {
   const [schedule, setSchedule] = useState<ScheduleWithMembers | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { userId, nickname } = useAuthStore();
-  const params = useParams<{id: string}>();
+  const params = useParams<{ id: string }>();
 
   const fetchSchedule = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:8080/schedule/${params.id}`, {
-        headers: {
-          'Authorization': `Bearer ${userId}`,
-        },
-      });
+      const response = await fetch(
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -49,12 +53,15 @@ export default function ScheduleDetail() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/schedule/${params.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${userId}`,
-        },
-      });
+      const response = await fetch(
+        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(Number(params.id))}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
+        }
+      );
 
       if (response.ok) {
         alert('일정이 삭제되었습니다.');
@@ -91,10 +98,7 @@ export default function ScheduleDetail() {
         <div className="content-container">
           <div className="card text-center">
             <p className="section-content">일정을 찾을 수 없습니다.</p>
-            <button
-              onClick={handleBack}
-              className="btn-primary mt-4"
-            >
+            <button onClick={handleBack} className="btn-primary mt-4">
               대시보드로 돌아가기
             </button>
           </div>
@@ -107,21 +111,22 @@ export default function ScheduleDetail() {
     <div className="page-container animate-fade-in">
       <div className="content-container">
         <div className="card">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-extrabold text-gray-900">{schedule.title}</h2>
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex flex-col">
+              <h2 className="text-3xl font-extrabold text-gray-900">
+                {schedule.title}
+              </h2>
+              <h6 className="text-right text-gray-500">
+                {schedule.creatorNickname}
+              </h6>
+            </div>
             <div className="flex space-x-2">
               {schedule.creatorNickname === nickname && (
                 <>
-                  <button
-                    onClick={handleEdit}
-                    className="btn-primary"
-              >
-                수정
-              </button>
-              <button
-                onClick={handleDelete}
-                    className="btn-danger"
-                  >
+                  <button onClick={handleEdit} className="btn-primary">
+                    수정
+                  </button>
+                  <button onClick={handleDelete} className="btn-danger">
                     삭제
                   </button>
                 </>
@@ -129,28 +134,29 @@ export default function ScheduleDetail() {
             </div>
           </div>
 
-          <div className="max-w-2xl mx-auto p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{schedule.title}</h1>
-              </div>
-
+          <div className="mx-auto max-w-2xl p-4">
+            <div className="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
               <div className="form-container">
                 <div>
                   <h3 className="section-title">설명</h3>
-                  <p className="section-content whitespace-pre-wrap">{schedule.description}</p>
+                  <p className="section-content whitespace-pre-wrap">
+                    {schedule.description}
+                  </p>
                 </div>
 
                 <div>
                   <h3 className="section-title">일정 시간</h3>
                   <p className="section-content">
-                    {new Date(schedule.meetingDateTime).toLocaleString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {new Date(schedule.meetingDateTime).toLocaleString(
+                      'ko-KR',
+                      {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }
+                    )}
                   </p>
                 </div>
 
@@ -162,10 +168,10 @@ export default function ScheduleDetail() {
                 <div>
                   <h3 className="section-title">참가자</h3>
                   <ul className="mt-2 space-y-2">
-                    {schedule.members?.map(member => (
+                    {schedule.members?.map((member) => (
                       <li
                         key={member.id}
-                        className="flex items-center justify-between bg-gray-100 rounded-md px-3 py-2"
+                        className="flex items-center justify-between rounded-md bg-gray-100 px-3 py-2"
                       >
                         <span>{member.nickname}</span>
                       </li>
@@ -175,10 +181,7 @@ export default function ScheduleDetail() {
               </div>
 
               <div className="mt-8">
-                <button
-                  onClick={handleBack}
-                  className="btn-secondary w-full"
-                >
+                <button onClick={handleBack} className="btn-secondary w-full">
                   대시보드로 돌아가기
                 </button>
               </div>
