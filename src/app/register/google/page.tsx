@@ -10,11 +10,14 @@ export default function GoogleRegisterPage() {
   const { login } = useAuthStore();
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const email = urlParams.get('email');
+    const tempToken = urlParams.get('tempToken');
     setEmail(email || '');
+    setToken(tempToken || '');
   }, [login, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,12 +31,16 @@ export default function GoogleRegisterPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email, nickname }),
+          body: JSON.stringify({ email, nickname, tempToken: token }),
         }
       );
 
       if (response.ok) {
-        router.push('/dashboard');
+        router.push('/login');
+      } else if (response.status === 400) {
+        const data = await response.json();
+        setToken(data.tempToken);
+        alert(data.message);
       } else {
         alert('중복되는 닉네임입니다.');
       }
