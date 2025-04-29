@@ -12,6 +12,7 @@ export default function InfoPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [info, setInfo] = useState<UserInfo | null>(null);
+  const { token } = useAuthStore();
 
   const fetchInfo = useCallback(async () => {
     if (!nickname) {
@@ -24,6 +25,10 @@ export default function InfoPage() {
       const response = await fetch(
         `${API.BASE_URL}${API.ENDPOINTS.USER.MY_INFO}?nickname=${nickname}`,
         {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
           credentials: 'include',
         }
       );

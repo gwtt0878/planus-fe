@@ -10,7 +10,7 @@ export default function ScheduleDetail() {
   const [schedule, setSchedule] = useState<ScheduleWithMembers | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { userId, nickname } = useAuthStore();
+  const { userId, nickname, token } = useAuthStore();
   const params = useParams<{ id: string }>();
 
   const fetchSchedule = useCallback(async () => {
@@ -52,6 +52,9 @@ export default function ScheduleDetail() {
         `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(Number(params.id))}`,
         {
           method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           credentials: 'include',
         }
       );

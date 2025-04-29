@@ -6,6 +6,8 @@ export const API = {
       REGISTER: '/user/register',
       MY_INFO: '/user/myinfo',
       SEARCH: '/user/search',
+      GOOGLE_REGISTER: '/auth/login/google',
+      GOOGLE_SET_NICKNAME: '/auth/nickname',
     },
     SCHEDULE: {
       LIST: '/schedule',

@@ -6,8 +6,13 @@ interface AuthState {
   nickname: string | null;
   email: string | null;
   isLoggedIn: boolean;
-  // eslint-disable-next-line no-unused-vars
-  login: (userId: number, nickname: string, email: string) => void;
+  token: string | null;
+  login: (
+    userId: number,
+    nickname: string,
+    email: string,
+    token: string
+  ) => void;
   logout: () => void;
 }
 
@@ -17,11 +22,18 @@ export const useAuthStore = create<AuthState>()(
       userId: null,
       nickname: null,
       email: null,
+      token: null,
       isLoggedIn: false,
-      login: (userId: number, nickname: string, email: string) =>
-        set({ userId, nickname, email, isLoggedIn: true }),
+      login: (userId: number, nickname: string, email: string, token: string) =>
+        set({ userId, nickname, email, token, isLoggedIn: true }),
       logout: () =>
-        set({ userId: null, nickname: null, email: null, isLoggedIn: false }),
+        set({
+          userId: null,
+          nickname: null,
+          email: null,
+          token: null,
+          isLoggedIn: false,
+        }),
     }),
     {
       name: 'auth-storage',

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import React from 'react';
 import { API } from '@/config/api';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,7 +36,9 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        login(data.userId, data.nickname, data.email);
+        const token = data.token;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        login(payload.sub, payload.nickname, payload.email, token);
       } else {
         const errorData = await response.json();
         alert(errorData.message || '로그인에 실패했습니다.');
@@ -44,6 +47,10 @@ export default function LoginPage() {
       console.error('로그인 에러:', error);
       alert('로그인 중 오류가 발생했습니다. 서버가 실행 중인지 확인해주세요.');
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    window.location.href = `${API.BASE_URL}${API.ENDPOINTS.USER.GOOGLE_REGISTER}`;
   };
 
   return (
@@ -104,6 +111,9 @@ export default function LoginPage() {
           >
             회원가입
           </a>
+        </div>
+        <div className="flex justify-center">
+          <GoogleLoginButton onClick={handleGoogleLogin} />
         </div>
       </div>
     </div>

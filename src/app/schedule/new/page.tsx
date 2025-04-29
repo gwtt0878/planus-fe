@@ -25,8 +25,8 @@ export default function CreateSchedule() {
     userId: currentUserId,
     nickname: currentNickname,
     email: currentEmail,
+    token: currentToken,
   } = useAuthStore();
-
   const [schedule, setSchedule] = useState<ScheduleWithMembers>({
     title: '',
     description: '',
@@ -144,6 +144,7 @@ export default function CreateSchedule() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              Authorization: `Bearer ${currentToken}`,
             },
             credentials: 'include',
             body: JSON.stringify(scheduleJSON),
@@ -275,7 +276,7 @@ export default function CreateSchedule() {
               {schedule.members.length > 0 && (
                 <div className="mt-4">
                   <h3 className="section-title">선택된 참가자</h3>
-                  <ul className="mt-2 space-y-2">
+                  <ul className="mt-2 space-y-2" key={schedule.members.length}>
                     {schedule.members.map((user) => (
                       <li
                         key={user.id}

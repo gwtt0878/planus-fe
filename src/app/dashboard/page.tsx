@@ -9,15 +9,11 @@ import { API } from '@/config/api';
 export default function DashboardPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const router = useRouter();
-  const { isLoggedIn, nickname } = useAuthStore();
+  const { nickname, token } = useAuthStore();
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
     fetchSchedules();
-  }, [isLoggedIn, router]);
+  }, [router]);
 
   const fetchSchedules = async () => {
     try {
@@ -47,6 +43,9 @@ export default function DashboardPage() {
         `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DELETE(id)}`,
         {
           method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           credentials: 'include',
         }
       );
@@ -72,10 +71,6 @@ export default function DashboardPage() {
       minute: '2-digit',
     });
   };
-
-  if (!isLoggedIn) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">

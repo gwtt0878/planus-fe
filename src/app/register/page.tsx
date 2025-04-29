@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { API } from '@/config/api';
 import { useAuthStore } from '@/store/authStore';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
 export default function RegisterPage() {
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
@@ -53,6 +54,10 @@ export default function RegisterPage() {
         '회원가입 중 오류가 발생했습니다. 서버가 실행 중인지 확인해주세요.'
       );
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API.BASE_URL}${API.ENDPOINTS.USER.GOOGLE_REGISTER}`;
   };
 
   return (
@@ -143,6 +148,9 @@ export default function RegisterPage() {
           >
             로그인
           </a>
+        </div>
+        <div className="flex justify-center">
+          <GoogleLoginButton onClick={handleGoogleLogin} />
         </div>
       </div>
     </div>

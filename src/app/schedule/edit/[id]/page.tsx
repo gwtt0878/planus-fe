@@ -20,7 +20,11 @@ export default function EditSchedule() {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
-  const { userId: currentUserId, nickname: currentNickname } = useAuthStore();
+  const {
+    userId: currentUserId,
+    nickname: currentNickname,
+    token,
+  } = useAuthStore();
   const params = useParams<{ id: string }>();
 
   const fetchSchedule = useCallback(async () => {
@@ -63,7 +67,6 @@ export default function EditSchedule() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('검색 결과:', data);
           setSearchResults(data.users);
         }
       } catch (error) {
@@ -138,6 +141,7 @@ export default function EditSchedule() {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
             },
             credentials: 'include',
             body: JSON.stringify(scheduleJSON),
