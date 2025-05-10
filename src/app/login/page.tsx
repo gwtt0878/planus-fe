@@ -113,7 +113,7 @@ export default function LoginPage() {
           </a>
         </div>
         <div className="flex justify-center">
-          <GoogleLoginButton onClick={handleGoogleLogin} />
+          <GoogleLoginButton />
         </div>
       </div>
     </div>

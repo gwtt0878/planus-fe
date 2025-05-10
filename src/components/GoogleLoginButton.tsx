@@ -2,14 +2,16 @@
 
 import React from 'react';
 import './GoogleLoginButton.css';
-export default function GoogleLoginButton({
-  onClick,
-}: {
-  onClick: () => void;
-}) {
+import { GOOGLE } from '@/config/google';
+
+function onClick() {
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE.CLIENT_ID}&redirect_uri=${GOOGLE.REDIRECT_URI}&response_type=code&scope=openid%20email%20profile`;
+}
+
+export default function GoogleLoginButton() {
   return (
     <button className="gsi-material-button" onClick={onClick}>
-      <div className="">
+      <div className="flex items-center justify-center">
         <svg
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"

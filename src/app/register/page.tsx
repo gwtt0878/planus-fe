@@ -150,7 +150,7 @@ export default function RegisterPage() {
           </a>
         </div>
         <div className="flex justify-center">
-          <GoogleLoginButton onClick={handleGoogleLogin} />
+          <GoogleLoginButton />
         </div>
       </div>
     </div>
