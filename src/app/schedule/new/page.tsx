@@ -6,6 +6,8 @@ import { ScheduleWithMembers } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
 import React from 'react';
 import { API } from '@/config/api';
+import SelectedMembers from '@/components/SelectedMembers';
+
 interface User {
   id: number;
   email: string;
@@ -33,7 +35,11 @@ export default function CreateSchedule() {
     meetingDateTime: '',
     meetingPlace: '',
     members: [
-      { id: currentUserId, email: currentEmail, nickname: currentNickname },
+      {
+        memberId: currentUserId,
+        email: currentEmail,
+        nickname: currentNickname,
+      },
     ],
     creatorNickname: currentNickname,
     createdAt: '',
@@ -101,11 +107,11 @@ export default function CreateSchedule() {
 
   const handleAddUser = useCallback(
     (user: User) => {
-      if (!schedule.members.some((m) => m.id === user.id)) {
+      if (!schedule.members.some((m) => m.memberId === user.id)) {
         setSchedule((prev) => ({
           ...prev,
-          members: [...prev.members, user].sort((a, b) =>
-            a.nickname.localeCompare(b.nickname)
+          members: [...prev.members, { ...user, memberId: user.id }].sort(
+            (a, b) => a.nickname.localeCompare(b.nickname)
           ),
         }));
       }
@@ -119,7 +125,7 @@ export default function CreateSchedule() {
     (userId: number) => {
       setSchedule((prev) => ({
         ...prev,
-        members: prev.members.filter((m) => m.id !== userId),
+        members: prev.members.filter((m) => m.memberId !== userId),
       }));
     },
     [schedule.members]
@@ -136,7 +142,7 @@ export default function CreateSchedule() {
           description: schedule.description,
           meetingDateTime: schedule.meetingDateTime,
           meetingPlace: schedule.meetingPlace,
-          memberIds: schedule.members.map((m) => m.id),
+          memberIds: schedule.members.map((m) => m.memberId),
         };
         const scheduleResponse = await fetch(
           `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.CREATE}`,
@@ -273,30 +279,11 @@ export default function CreateSchedule() {
                 </div>
               )}
 
-              {schedule.members.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="section-title">선택된 참가자</h3>
-                  <ul className="mt-2 space-y-2" key={schedule.members.length}>
-                    {schedule.members.map((user) => (
-                      <li
-                        key={user.id}
-                        className="flex items-center justify-between rounded-md bg-gray-100 px-3 py-2"
-                      >
-                        <span>{user.nickname}</span>
-                        {user.id !== currentUserId && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveUser(user.id)}
-                            className="text-gray-500 hover:text-gray-700"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <SelectedMembers
+                members={schedule.members}
+                currentUserId={currentUserId}
+                onRemoveUser={handleRemoveUser}
+              />
             </div>
 
             <div className="flex space-x-4">

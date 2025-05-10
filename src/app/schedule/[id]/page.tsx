@@ -1,38 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ScheduleWithMembers } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
 import { API } from '@/config/api';
+import SelectedMembers from '@/components/SelectedMembers';
+import { useSchedule } from '@/hooks/useSchedule';
 
 export default function ScheduleDetail() {
-  const [schedule, setSchedule] = useState<ScheduleWithMembers | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { userId, nickname, token } = useAuthStore();
   const params = useParams<{ id: string }>();
-
-  const fetchSchedule = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSchedule(data);
-      } else {
-        alert('일정을 불러오는데 실패했습니다.');
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      console.error('일정 조회 에러:', error);
-      alert('일정 조회 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [params.id, userId, router]);
+  const { schedule, isLoading, fetchSchedule } = useSchedule({
+    scheduleId: Number(params.id),
+  });
 
   useEffect(() => {
     fetchSchedule();
@@ -163,16 +144,10 @@ export default function ScheduleDetail() {
 
                 <div>
                   <h3 className="section-title">참가자</h3>
-                  <ul className="mt-2 space-y-2">
-                    {schedule.members?.map((member) => (
-                      <li
-                        key={member.id}
-                        className="flex items-center justify-between rounded-md bg-gray-100 px-3 py-2"
-                      >
-                        <span>{member.nickname}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <SelectedMembers
+                    members={schedule.members}
+                    currentUserId={userId}
+                  />
                 </div>
               </div>
 

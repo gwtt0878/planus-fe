@@ -8,7 +8,7 @@ interface AuthState {
   isLoggedIn: boolean;
   token: string | null;
   login: (
-    userId: number,
+    userId: number | string,
     nickname: string,
     email: string,
     token: string
@@ -24,8 +24,19 @@ export const useAuthStore = create<AuthState>()(
       email: null,
       token: null,
       isLoggedIn: false,
-      login: (userId: number, nickname: string, email: string, token: string) =>
-        set({ userId, nickname, email, token, isLoggedIn: true }),
+      login: (
+        userId: number | string,
+        nickname: string,
+        email: string,
+        token: string
+      ) =>
+        set({
+          userId: typeof userId === 'string' ? parseInt(userId, 10) : userId,
+          nickname,
+          email,
+          token,
+          isLoggedIn: true,
+        }),
       logout: () =>
         set({
           userId: null,

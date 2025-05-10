@@ -8,8 +8,8 @@ export default function Header() {
   const { isLoggedIn, logout, nickname } = useAuthStore();
 
   const handleLogout = () => {
+    router.push('/dashboard');
     logout();
-    router.push('/login');
   };
 
   return (

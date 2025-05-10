@@ -1,3 +1,5 @@
+import { User } from './user';
+
 export interface Schedule {
   id?: number;
   title: string;
@@ -10,11 +12,11 @@ export interface Schedule {
 }
 
 export interface ScheduleWithMembers extends Schedule {
-  members: User[];
+  members: ScheduleMember[];
 }
 
-export interface User {
-  id: number;
+export interface ScheduleMember {
+  memberId: number;
   nickname: string;
   email: string;
 }

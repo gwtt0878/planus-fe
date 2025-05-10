@@ -2,20 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ScheduleWithMembers } from '@/types/schedule';
 import { useAuthStore } from '@/store/authStore';
 import React from 'react';
 import { API } from '@/config/api';
-
-interface User {
-  id: number;
-  email: string;
-  nickname: string;
-}
+import { User } from '@/types/user';
+import SelectedMembers from '@/components/SelectedMembers';
+import { useSchedule } from '@/hooks/useSchedule';
 
 export default function EditSchedule() {
-  const [schedule, setSchedule] = useState<ScheduleWithMembers | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -26,27 +20,9 @@ export default function EditSchedule() {
     token,
   } = useAuthStore();
   const params = useParams<{ id: string }>();
-
-  const fetchSchedule = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${API.BASE_URL}${API.ENDPOINTS.SCHEDULE.DETAIL(Number(params.id))}`
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSchedule(data);
-      } else {
-        alert('일정을 불러오는데 실패했습니다.');
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      console.error('일정 조회 에러:', error);
-      alert('일정 조회 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [params.id, currentUserId, router]);
+  const { schedule, setSchedule, isLoading, fetchSchedule } = useSchedule({
+    scheduleId: Number(params.id),
+  });
 
   useEffect(() => {
     fetchSchedule();
@@ -92,13 +68,13 @@ export default function EditSchedule() {
 
   const handleAddUser = useCallback(
     (user: User) => {
-      if (!schedule?.members.some((m) => m.id === user.id)) {
+      if (!schedule?.members.some((m) => m.memberId === user.id)) {
         setSchedule((prev) =>
           prev
             ? {
                 ...prev,
-                members: [...prev.members, user].sort((a, b) =>
-                  a.nickname.localeCompare(b.nickname)
+                members: [...prev.members, { ...user, memberId: user.id }].sort(
+                  (a, b) => a.nickname.localeCompare(b.nickname)
                 ),
               }
             : null
@@ -115,7 +91,7 @@ export default function EditSchedule() {
       prev
         ? {
             ...prev,
-            members: prev.members.filter((m) => m.id !== userId),
+            members: prev.members.filter((m) => m.memberId !== userId),
           }
         : null
     );
@@ -132,7 +108,7 @@ export default function EditSchedule() {
           description: schedule.description,
           meetingDateTime: schedule.meetingDateTime,
           meetingPlace: schedule.meetingPlace,
-          memberIds: schedule.members.map((m) => m.id),
+          memberIds: schedule.members.map((m) => m.memberId),
         };
 
         const response = await fetch(
@@ -312,29 +288,13 @@ export default function EditSchedule() {
                 </div>
               )}
 
-              {schedule?.members && schedule.members.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="section-title">선택된 참가자</h3>
-                  <ul className="mt-2 space-y-2">
-                    {schedule.members.map((member) => (
-                      <li
-                        key={member.id}
-                        className="flex items-center justify-between rounded-md bg-gray-100 px-3 py-2"
-                      >
-                        <span>{member.nickname}</span>
-                        {member.id !== currentUserId && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveUser(member.id)}
-                            className="text-gray-500 hover:text-gray-700"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="mt-2">선택된 참가자</div>
+              {schedule?.members && (
+                <SelectedMembers
+                  members={schedule.members}
+                  currentUserId={currentUserId}
+                  onRemoveUser={handleRemoveUser}
+                />
               )}
             </div>
 
